@@ -1,0 +1,122 @@
+﻿@page "/userInvestments"
+@using Investment_Calc.Data.Models
+@using WebAssemblyMan
+@inject Investment_Calc.Data.Interfaces.I_InvestmentRepo Repo
+@inject NavigationManager NavManager
+
+
+@if (calcs.Count > 0)
+{
+    <br />
+    <h3>Your Investments:</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Starting Principle</th>
+                <th>Current Value</th>
+                <th>Interest</th>
+                <th>Compounds Per Year</th>
+                <th>Years</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cal in calcs)
+            {
+                <tr>
+                    <td>@cal.Principle.ToString("C2")</td>
+                    @{
+                        double fv = (double)cal.FutureValue!;
+                        String str = fv.ToString("C2");
+                        <td>@str</td>
+                    }
+                    <td>@cal.Interest.ToString("P2")</td>
+                    <td>@cal.CmpPerYr</td>
+                    <td>@cal.Years</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h3>Your current investment value is @totalValue.ToString("C2")</h3>
+    <link href="_content/LineChart/styles.css" rel="stylesheet" />
+    <br />
+    <LineChart InputSeries1="@getValues()" XAxisLabels="@getDates()" InputLabels="Asset Value Over Time"></LineChart>
+        
+}
+else
+{
+    <h3>No investments available to display.</h3>
+}
+
+@code {
+    class inventory {
+        public DateTime year { get; set; }
+        public double totalValue { get; set; }
+    }
+
+    [CascadingParameter(Name = "user")]
+    User User { get; set; }
+
+    [Parameter]
+    public double totalValue { get; set; }
+
+    List<InvestmentCalc>? calcs { get; set; }
+    List<inventory> tableVals { get; set; }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await base.OnInitializedAsync();
+        calcs = await Repo.GetUserInvestmentsAsync(User);
+        if(calcs.Count > 0) {
+            totalValue = 0;
+            foreach (var cal in calcs)
+            {
+                double t = 0;
+                if(cal.FutureValue != null) {
+                    t = (double)cal.FutureValue;
+                }
+                totalValue += t;
+            }
+            setUpValues();
+        }
+    }
+
+    public String getValues()
+    {
+        return String.Join(",", tableVals.Select(o => Math.Round(o.totalValue).ToString()).ToList());
+    }
+    public String getDates()
+    {
+        return String.Join(",", tableVals.Select(o => o.year.Year.ToString()).ToList());
+    }
+
+    private void setUpValues() 
+    {
+        var listed = calcs.OrderByDescending(o => o.Years);
+
+        int StartYear = DateTime.Today.Year - listed.First().Years;
+        int EndYear = DateTime.Today.Year;
+        tableVals = new List<inventory>();
+        // Set to end of every year, starting with the earliest year in the list
+        DateTime currentYear = new DateTime(StartYear, 12, 31);
+        DateTime endYear = new DateTime(EndYear, 12, 31);
+        while (currentYear.Year <= endYear.Year)
+        {
+            inventory inve = new inventory();
+            inve.year = currentYear;
+            inve.totalValue = 0;
+            foreach (var calc in listed)
+            {
+                // Add every asset to the value if it was added before current year
+                if ((DateTime.Now.Year - calc.Years) <= currentYear.Year)
+                {
+                    inve.totalValue += calc.Calc(calc.Years - (EndYear - currentYear.Year));
+                }
+            }
+            tableVals.Add(inve);
+            currentYear = currentYear.AddYears(1);
+        }
+    }
+}

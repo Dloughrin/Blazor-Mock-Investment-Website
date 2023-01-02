@@ -1,0 +1,67 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h1 class="nav justify-content-center">Hello, @mlayout.User.Name!</h1>
+
+<div class="nav justify-content-center">
+    <div class="nav flex-column">
+        <article class="nav justify-content-center">
+            This is an investment calculation tool for Engulf and Devour. <br>
+            Use the navigation bar on the left-hand side to switch to the calculation page or the assets page.
+        </article>
+        <br><br>
+    </div>
+</div>
+
+
+<div class="nav justify-content-center" >
+    <div class="nav flex-column" style="margin-right:80px">
+        <h3>Select User</h3>
+
+        @foreach (var u in mlayout.Users)
+        {
+            @if (u.Id == mlayout.User.Id)
+            {
+                <p>
+                    <button disabled="true" class="btn btn-primary" @onclick="()=>changeUser(u.Id)">@u.Name</button>
+                    <br />
+                </p>
+            }
+            else
+            {
+                <p>
+                    <button class="btn btn-primary" @onclick="()=>changeUser(u.Id)">@u.Name</button>
+                    <br />
+                </p>
+            }
+        }
+    </div>
+    <div>
+        <h3>Create User</h3>
+        <label class="form-check-label" for="cpy">New Username:</label>
+        <input class="input-group-text" type="text" id="uname"
+               @bind="@uname">
+        <br />
+        <button class="btn btn-primary" @onclick="()=>addUser(uname)">Add New User</button>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public string uname { get; set; }
+
+    [CascadingParameter(Name = "layout")]
+    MainLayout mlayout { get; set; }
+
+    void changeUser(int id)
+    {
+        mlayout.ChangeUser(id);
+    }
+
+    void addUser(string name)
+    {
+        mlayout.AddUser(name);
+    }
+}

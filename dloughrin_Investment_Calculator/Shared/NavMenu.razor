@@ -1,0 +1,64 @@
+﻿@using Investment_Calc.Data.Models
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Investment Calculator</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="userInvestments">
+                <span class="oi oi-bar-chart" aria-hidden="true"></span> Your Investments
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="investments">
+                <span class="oi oi-list" aria-hidden="true"></span> All Investments
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="assets">
+                <span class="oi oi-calculator" aria-hidden="true"></span> Asset List
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="contact">
+                <span class="oi oi-person" aria-hidden="true"></span> Contact Support
+            </NavLink>
+        </div>
+        @if (User.isAdmin())
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="contactTable">
+                    <span class="oi oi-people" aria-hidden="true"></span> Support Tickets
+                </NavLink>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    [CascadingParameter(Name = "user")]
+    User User { get; set; }
+
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

@@ -1,0 +1,303 @@
+﻿@page "/AddAsset/{Id:int?}"
+@using Investment_Calc.Data.Models
+@using WebAssemblyMan
+@inject Investment_Calc.Data.Interfaces.I_AssetRepo Repo
+@inject NavigationManager NavManager
+
+<PageTitle>Investment Calculator</PageTitle>
+
+@if (asset == null && Id != null)
+{
+    <p>Investment does not exist.</p>
+}
+else
+{
+    if(Id != null) {
+        <h3>Asset Value Over Time</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Total Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ent in table)
+                {
+                    <tr>
+                        <td>@ent.year.Year</td>
+                        <td>@ent.totalValue.ToString("C2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <br />
+        
+        <div>
+            <div style="float:left;width:250px">
+                <label class="form-check-label">Start Year:</label>
+                <input class="input-group-text" type="int" @bind="@StartYear">
+                <br />
+            </div>
+
+            <div style="float:left;width:250px">
+                <label class="form-check-label">End Year:</label>
+                <input class="input-group-text" type="int" @bind="@EndYear">
+                <br />
+            </div>
+
+            <div style="float:left;width:250px">
+                <br>
+                <button class="btn btn-primary" @onclick="submitGraphChange">Update Graph</button>
+            </div>
+
+            <link href="_content/LineChart/styles.css" rel="stylesheet" />
+            <LineChart InputSeries1="@getValues()" XAxisLabels="@getDates()" InputLabels="Asset Value Over Time"> </LineChart>
+            <br />
+        </div>
+    }
+
+    <h1>Asset Parameters</h1>
+
+    <label class="form-check-label" for="princ">Starting Value:</label>
+    <input class="input-group-text" type="double" name="princ" id="princ"
+       @bind="@startVal">
+    <br />
+
+    <label class="form-check-label" for="princ">Salvage Value:</label>
+    <input class="input-group-text" type="double" name="princ" id="princ"
+       @bind="@salvVal">
+    <br />
+
+    <label class="form-check-label" for="year">Years to Expiration:</label>
+    <input class="input-group-text" type="int" id="year"
+       @bind="@expir">
+    <br />
+
+    <label class="form-check-label" for="interest">Entered Date:</label>
+    <input class="input-group-text" type="date" id="interest"
+       @bind="@enter">
+    <br />
+
+    <label class="form-check-label" for="chckBox"> Use Exit Date?</label>
+    <input type="checkbox" id="chckBox" @bind="@checkd">
+    <br />
+    <br />
+
+    if(checkd) {
+        <label class="form-check-label" for="cpy">Exit Date:</label>
+        <input class="input-group-text" type="date" id="cpy"
+            @bind="@leave">
+        <br />
+    }
+
+    <button class="btn btn-primary" @onclick="Submit">Submit</button>
+
+    <br />
+    <br />
+
+    <div class="list-group">
+        <a class="list-group-item list-group-item-action flex-column align-items-start active">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">@IssueTxt</h5>
+            </div>
+        </a>
+        <a class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Starting Value</h5>
+            </div>
+            <p class="mb-1">Must be larger than 0.</p>
+        </a>
+        <a class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Salvage Value</h5>
+            </div>
+            <p class="mb-1">Must be larger than 0.</p>
+        </a>
+        <a class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Years to Expiration</h5>
+            </div>
+            <p class="mb-1">Must be at least 1.</p>
+        </a>
+        <a class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Entered Date</h5>
+            </div>
+            <p class="mb-1">Cannot be after the current date.</p>
+        </a>
+        <a class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Exit Date (Optional)</h5>
+            </div>
+            <p class="mb-1">Must be after the Entered Date.</p>
+        </a>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    [Parameter]
+    public int StartYear { get; set; }
+
+    [Parameter]
+    public int EndYear { get; set; }
+
+    [Parameter]
+    public double expir { get; set; }
+
+    [Parameter]
+    public double startVal { get; set; }
+
+    [Parameter]
+    public double salvVal { get; set; }
+
+    [Parameter]
+    public DateTime enter { get; set; }
+
+    [Parameter]
+    public DateTime leave { get; set; }
+
+    [Parameter]
+    public Boolean checkd { get; set; }
+
+
+    class entry {
+        public DateTime year { get; set; }
+        public double totalValue { get; set; }
+    }
+
+    List<entry> table { get; set; }
+    Asset asset { get; set; }
+    private string IssueTxt = "All Inputs in Range";
+
+    public String getValues()
+    {
+        return String.Join(",", table.Select(o => Math.Round(o.totalValue).ToString()).ToList());
+    }
+    public String getDates()
+    {
+        return String.Join(",", table.Select(o => o.year.Year.ToString()).ToList());
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        checkd = false;
+
+        if (Id == null)
+        {
+            startVal = 1000;
+            salvVal = 200;
+            expir = 5;
+            enter = DateTime.Today;
+            leave = DateTime.Today;
+            asset = new Asset();
+        }
+        else
+        {
+            asset = await Repo.GetAssetAsync((int)Id);
+            if (asset != null)
+            {
+                startVal = asset.StartValue;
+                salvVal = asset.SalvageValue;
+                expir = asset.Expiration;
+                enter = asset.EnterDate;
+                if (asset.LeaveDate != null)
+                {
+                    checkd = true;
+                    leave = (DateTime)asset.LeaveDate;
+                }
+                else
+                {
+                    checkd = false;
+                    leave = DateTime.Today;
+                }
+
+                StartYear = asset.EnterDate.Year;
+                EndYear = DateTime.Today.Year;
+                updateTable();
+            }
+        }
+    }
+
+    public void submitGraphChange() {
+        if (StartYear > EndYear) {
+            int t = StartYear;
+            StartYear = EndYear;
+            EndYear = t;
+        }
+        updateTable();
+    }
+
+    public void updateTable()
+    {
+        table = new List<entry>();
+        // Set to end of every year, starting with the earliest year in the list
+        DateTime currentYear = new DateTime(StartYear, 12, 31);
+        DateTime endYear = new DateTime(EndYear, 12, 31);
+        while (currentYear.Year <= endYear.Year)
+        {
+            entry ent = new entry();
+            if (currentYear.Year == DateTime.Today.Year)
+            {
+                // If it's the current year, set the date to today to make it current
+                currentYear = DateTime.Today;
+            }
+            ent.year = currentYear;
+            ent.totalValue = 0;
+            if (asset.EnterDate <= currentYear)
+            {
+                ent.totalValue += asset.Calc(currentYear);
+            }
+            table.Add(ent);
+            currentYear = currentYear.AddYears(1);
+        }
+    }
+
+    private async void Submit()
+    {
+        // Try-catch will receive any input errors thrown
+        try
+        {
+            if (Id == null)
+            {
+                if (checkd == false)
+                {
+                    asset = new Asset(startVal, salvVal, (int)expir, enter, null);
+                }
+                else
+                {
+                    asset = new Asset(startVal, salvVal, (int)expir, enter, leave);
+                }
+            }
+            else
+            {
+                asset.StartValue = startVal;
+                asset.SalvageValue = salvVal;
+                asset.Expiration = expir;
+                asset.EnterDate = enter;
+                if(checkd) {
+                    asset.LeaveDate = leave;
+                }
+            }
+
+            if (asset != null)
+            {
+                await Repo.SaveAssetAsync(asset);
+            }
+
+            // Mostly for testing purposes
+            IssueTxt = "All Inputs in Range";
+
+            NavManager.NavigateTo($"/assets");
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            IssueTxt = e.Message;
+        }
+    }
+}

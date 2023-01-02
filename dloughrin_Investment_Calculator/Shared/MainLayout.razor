@@ -1,0 +1,61 @@
+﻿@inherits LayoutComponentBase
+@using Investment_Calc.Data.Models
+@inject Investment_Calc.Data.Interfaces.I_UserRepo Repo
+
+<PageTitle>dloughrin_Investment_Calculator</PageTitle>
+
+<CascadingValue Value="this" Name="layout">
+    <CascadingValue Value="User" Name="user">
+        <div class="page">
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+
+            <main>
+                <div class="top-row px-4">
+                        <a>Logged in as @User.Name</a>
+                </div>
+
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+        </div>
+    </CascadingValue>
+</CascadingValue>
+
+@code {
+    public User User = new User();
+    public List<User>? Users;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Users = await Repo.GetUsersAsync();
+        if (Users.Count == 0)
+        {
+            await Repo.SaveUserAsync(User);
+            Users = await Repo.GetUsersAsync();
+        }
+        User = Users.First();
+    }
+
+    public async void ChangeUser(int id)
+    {
+        User = await Repo.GetUserAsync(id);
+        StateHasChanged();
+    }
+
+    public async void AddUser(string name)
+    {
+        if(name == null) {
+            return;
+        }
+        User u = new User(name);
+        await Repo.SaveUserAsync(u);
+        Users = await Repo.GetUsersAsync();
+        User = Users.Last();
+
+        StateHasChanged();
+    }
+}

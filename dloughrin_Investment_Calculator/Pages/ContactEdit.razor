@@ -1,0 +1,114 @@
+﻿@page "/contactEdit/{Id:int?}"
+@using Investment_Calc.Data.Models
+@inject Investment_Calc.Data.Interfaces.I_ContactFormRepo Repo
+@inject NavigationManager NavManager
+
+<h3>Edit Support Ticket</h3>
+
+@if (cf != null)
+{
+    <label class="form-check-label">User's Name:</label>
+    <input readonly=@true class ="input-group-text" type="text"
+           @bind="@name">
+    <br />
+
+    <label class="form-check-label">Email:</label>
+    <input readonly=@true class="input-group-text" type="text"
+           @bind="@email">
+    <br />
+
+    <label class="form-check-label">Phone Number:</label>
+    <input readonly=@true style ="margin-right:5px" class="input-group-text" type="text"
+            @bind="@phone">
+    <br />
+
+    <label class="form-check-label">Type of Inquiry:</label>
+    <input readonly=@true class ="input-group-text" type="text"
+           @bind="@inquiry">
+    <br />
+
+    <br />
+    <label class="form-check-label">Customer's Explaination':</label>
+    <input readonly=@true style="width: 100%; text-align:left;" class="input-group-text" type="text"
+           @bind="@text">
+    <br />
+    <label class="form-check-label"> Is Resolved?</label>
+    <input type="checkbox" value="false" @bind="@resolved">
+
+    <br />
+    <br />
+    <label class="form-check-label">Notes:</label>
+    <input style="width: 100%; text-align:left;" class="input-group-text" type="text"
+           @bind="@notes">
+
+    <br />
+
+    <button class="btn btn-primary" @onclick="SubmitChanges">Submit Changes</button>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    [Parameter]
+    public string name { get; set; }
+
+    [Parameter]
+    public string email { get; set; }
+
+    [Parameter]
+    public string phone { get; set; }
+
+    [Parameter]
+    public string inquiry { get; set; }
+
+    [Parameter]
+    public string text { get; set; }
+
+    [Parameter]
+    public string notes { get; set; }
+
+    [Parameter]
+    public bool resolved { get; set; }
+
+    private ContactForm cf;
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (Id != null)
+        {
+            cf = await Repo.GetCFAsync((int)Id);
+            if(cf != null) {
+                name = cf.CustomerName;
+                email = cf.CustomerEmail;
+                phone = cf.CustomerPhoneNumber;
+
+                String str = "New Investment";
+                if (cf.ContactType == ContactForm.TYPE_GENERAL_INQUIRY)
+                {
+                    str = "General Inquiry";
+                }
+                else if (cf.ContactType == ContactForm.TYPE_EXISTING_INVESTMENT)
+                {
+                    str = "Existing Investment";
+                }
+                inquiry = str;
+                text = cf.CustomerText;
+                notes = cf.SupportText;
+                resolved = cf.isResolved;
+            }
+        }
+    }
+
+    async void SubmitChanges() {
+        if (cf != null)
+        {
+            cf.SupportText = notes;
+            cf.isResolved = resolved;
+            await Repo.SaveCFAsync(cf);
+
+            NavManager.NavigateTo($"/contactTable");
+        }
+    }
+}

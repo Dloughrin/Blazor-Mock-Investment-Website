@@ -1,0 +1,193 @@
+﻿@page "/assets"
+@using Investment_Calc.Data.Models
+@using WebAssemblyMan
+@inject Investment_Calc.Data.Interfaces.I_AssetRepo Repo
+@inject NavigationManager NavManager
+
+
+<p>
+    <button type="button" class="btn btn-primary" @onclick="OnAddButtonClick">Add Asset</button>
+</p>
+
+@if (assets == null || assets.Count == 0)
+{
+    <br />
+    <h3>Asset List:</h3>
+    <br />
+    <p>No assets to show yet.</p>
+}
+else
+{
+    <br />
+    <h3>Asset List:</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Initial Value</th>
+                <th>Current Value</th>
+                <th>Date Entered</th>
+                <th>Date Retired</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var asset in assets)
+            {
+                <tr>
+                    <td>@asset.StartValue.ToString("C2")</td>
+                    @{
+                        String str = ((double)asset.CurrentValue).ToString("C2");
+                            <td>@str</td>
+                    }
+                    <td>@asset.EnterDate.ToShortDateString()</td>
+                    @if(@asset.LeaveDate == null) {
+                        <td> - </td>
+                    }
+                    else {
+                        DateTime dt = (DateTime)asset.LeaveDate;
+                        <td>@dt.ToShortDateString()</td>
+                    }
+                    <td><button type="button" class="btn btn-primary" @onclick="()=>OnEditButtonClick(asset)">Edit</button></td>
+                    <td><button type="button" class="btn btn-primary" @onclick="()=>OnDeleteButtonClick(asset)">Delete</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <br />
+    <h3>Inventory Total Value Table:</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Total Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var inve in inv)
+            {
+                <tr>
+                    <td>@inve.year.Year</td>
+                    <td>@inve.totalValue.ToString("C2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+    <div>
+        <div style="float:left;width:250px">
+            <label class="form-check-label">Start Year:</label>
+            <input class="input-group-text" type="int" @bind="@StartYear">
+            <br />
+        </div>
+
+        <div style="float:left;width:250px">
+            <label class="form-check-label">End Year:</label>
+            <input class="input-group-text" type="int" @bind="@EndYear">
+            <br />
+        </div>
+
+        <div style="float:left;width:250px">
+            <br>
+            <button class="btn btn-primary" @onclick="submitGraphChange">Update Graph</button>
+        </div>
+        
+        <link href="_content/LineChart/styles.css" rel="stylesheet" />
+        <LineChart InputSeries1="@getValues()" XAxisLabels="@getDates()" InputLabels="Inventory Value Over Time"></LineChart>
+        <br />
+    </div>
+
+}
+
+
+@code {
+    class inventory {
+        public DateTime year { get; set; }
+        public double totalValue { get; set; }
+    }
+
+    [Parameter]
+    public int StartYear { get; set; }
+
+    [Parameter]
+    public int EndYear { get; set; }
+
+    List<Asset>? assets { get; set; }
+    List<inventory> inv { get; set; }
+
+    public String getValues()
+    {
+        return String.Join(",", inv.Select(o => Math.Round(o.totalValue).ToString()).ToList());
+    }
+    public String getDates() {
+        return String.Join(",", inv.Select(o => o.year.Year.ToString()).ToList());
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        assets = await Repo.GetAssetsAsync();
+
+        // Set up the inventory values
+        if (assets != null && assets.Count > 0)
+        {
+            assets.Sort((x, y) => DateTime.Compare(x.EnterDate, y.EnterDate));
+
+            StartYear = assets.First().EnterDate.Year;
+            EndYear = DateTime.Today.Year;
+            updateTable();
+        }
+    }
+
+
+    public void submitGraphChange()
+    {
+        if(StartYear > EndYear) {
+            int t = StartYear;
+            StartYear = EndYear;
+            EndYear = t;
+        }
+        updateTable();
+    }
+
+    public void updateTable()
+    {
+        inv = new List<inventory>();
+        // Set to end of every year, starting with the earliest year in the list
+        DateTime currentYear = new DateTime(StartYear, 12, 31);
+        DateTime endYear = new DateTime(EndYear, 12, 31);
+        while (currentYear.Year <= endYear.Year) {
+            inventory inve = new inventory();
+            inve.year = currentYear;
+            inve.totalValue = 0;
+            foreach (var asset in assets) {
+                // Add every asset to the value if it was added before current year
+                if(asset.EnterDate <= currentYear) {
+                    inve.totalValue += asset.Calc(currentYear);
+                }
+            }
+            inv.Add(inve);
+            currentYear = currentYear.AddYears(1);
+        }
+    }
+
+    private async void OnAddButtonClick()
+    {
+        NavManager.NavigateTo("/AddAsset");
+    }
+    private async void OnEditButtonClick(Asset asset)
+    {
+        NavManager.NavigateTo($"/AddAsset/{asset.Id}");
+    }
+    private async void OnDeleteButtonClick(Asset asset)
+    {
+        //Remove from database
+        await Repo.DeleteAssetAsync(asset);
+        //Remove from list by completely deleting from list
+        assets?.Remove(asset);
+    }
+}

@@ -1,0 +1,155 @@
+﻿@page "/InvestmentInput/{Id:int?}"
+@inject NavigationManager NavManager
+@inject Investment_Calc.Data.Interfaces.I_InvestmentRepo Repo
+@using Investment_Calc.Data.Models
+
+<PageTitle>Investment Calculator</PageTitle>
+
+@if(calc == null && Id != null)
+{
+    <p>Investment does not exist.</p>
+}
+else
+{
+    <h1>Investment Parameters</h1>
+
+    <label class="form-check-label" for="princ">Principle:</label>
+    <input class="input-group-text" type="double" name="princ" id="princ"
+           @bind="@princ">
+    <br/>
+
+    <label class="form-check-label" for="year">Years:</label>
+    <input class="input-group-text" type="int" id="year"
+           @bind="@year">
+    <br/>
+
+    <label class="form-check-label" for="interest">Interest:</label>
+    <input class="input-group-text" type="double" id="interest"
+           @bind="@interest">
+    <br/>
+
+    <label class="form-check-label" for="cpy">Compounds Per Year:</label>
+    <input class="input-group-text" type="int" id="cpy"
+            @bind="@cpy">
+    <br/>
+
+    <button class="btn btn-primary" @onclick="Calculate">Submit</button>
+
+    <br/>
+    <br/>
+
+    <div class="list-group">
+        <a class="list-group-item list-group-item-action flex-column align-items-start active">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">@IssueTxt</h5>
+            </div>
+        </a>
+        <a class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Principle</h5>
+            </div>
+            <p class="mb-1">Principle should be a number larger than 0.</p>
+        </a>
+        <a class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Years</h5>
+            </div>
+            <p class="mb-1">Years should be at least 1, but less than 30.</p>
+        </a>
+        <a class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Interest</h5>
+            </div>
+            <p class="mb-1">Interest should be at least 0, and no more than 100.</p>
+        </a>
+        <a class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Compounds</h5>
+            </div>
+            <p class="mb-1">Compounds Per Year should be at least 1, and no more than 24.</p>
+        </a>
+    </div>
+}
+
+
+@code {
+    [CascadingParameter(Name = "user")]
+    User User { get; set; }
+
+    [Parameter]
+    public int? Id { get; set; }
+
+    [Parameter]
+    public int cpy { get; set; }
+
+    [Parameter]
+    public int year { get; set; }
+
+    [Parameter]
+    public double interest { get; set; }
+
+    [Parameter]
+    public double princ { get; set; }
+
+    private InvestmentCalc calc = new InvestmentCalc();
+    private string IssueTxt = "All Inputs in Range";
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (Id == null)
+        {
+            cpy = 1;
+            year = 1;
+            interest = 1;
+            princ = 10;
+            calc = new InvestmentCalc();
+            calc.User_ID = User.Id;
+        }
+        else
+        {
+            calc = await Repo.GetInvestmentAsync((int)Id);
+            if (calc != null)
+            {
+                cpy = calc.CmpPerYr;
+                year = calc.Years;
+                interest = calc.Interest*100;
+                princ = calc.Principle;
+            }
+        }
+    }
+
+    private async void Calculate()
+    {
+        // Try-catch will receive any input errors thrown
+        try {
+
+            // Using the InvestmentCalc class on this page instead of the result 
+            // page in order to do input checking before hand
+            if (calc == null)
+            {
+                calc = new InvestmentCalc(cpy, year, interest, princ, User.Id);
+            }
+            else {
+                calc.CmpPerYr = cpy;
+                calc.Years = year;
+                calc.Interest = interest;
+                calc.Principle = princ;
+            }
+
+            if (calc != null)
+            {
+                await Repo.SaveInvestmentAsync(calc);
+            }
+
+            // Mostly for testing purposes
+            IssueTxt = "All Inputs in Range";
+
+            // Pass the values to the new page to display
+            NavManager.NavigateTo($"/InvestmentOutput/{calc.FutureValue}/{cpy}/{year}/{interest}/{princ}");
+        }
+        catch(ArgumentOutOfRangeException e) {
+            IssueTxt = e.Message;
+        }
+    }
+}

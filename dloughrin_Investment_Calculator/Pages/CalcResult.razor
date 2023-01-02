@@ -1,0 +1,65 @@
+﻿@page "/InvestmentOutput/{future:double}/{cpy:int}/{year:int}/{interest:double}/{princ:double}"
+@inject NavigationManager NavManager
+
+<PageTitle>Calculated Investment</PageTitle>
+
+<h1>Total Investment: @value</h1>
+
+<label class="form-check-label" for="princ">Principle:</label>
+<input class="input-group-text" readonly=@true type="double" name="princ" id="princ"
+       @bind="@princ">
+<br />
+
+<label class="form-check-label" for="year">Years:</label>
+<input class="input-group-text" readonly=@true type="int" id="year"
+       @bind="@year">
+<br />
+
+<label class="form-check-label" for="interest">Interest:</label>
+<input class="input-group-text" readonly=@true type="double" id="interest"
+       @bind="@interest">
+<br />
+
+<label class="form-check-label" for ="cpy">Compounds Per Year:</label>
+<input class="input-group-text" readonly=@true type="int" id="cpy"
+       @bind="@cpy">
+<br />
+
+<button class="btn btn-primary" @onclick="Return">Go to New Input</button>
+<button class="btn btn-primary" @onclick="ReturnList">Go to Investment List</button>
+
+@code {
+    [Parameter]
+    public int cpy { get; set; } = 1;
+
+    [Parameter]
+    public int year { get; set; } = 1;
+
+    [Parameter]
+    public double interest { get; set; } = 1;
+
+    [Parameter]
+    public double princ { get; set; } = 10;
+
+    [Parameter]
+    public double future { get; set; } = 0;
+
+    public string value = "$0";
+
+    protected override void OnParametersSet()
+    {
+        //Make it pretty
+        value = String.Format("${0:n}", future);
+    }
+
+    private void Return()
+    {
+        NavManager.NavigateTo($"/InvestmentInput");
+    }
+
+    private void ReturnList()
+    {
+        NavManager.NavigateTo($"/investments");
+    }
+}
+

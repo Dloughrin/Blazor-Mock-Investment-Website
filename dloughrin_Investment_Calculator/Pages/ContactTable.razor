@@ -1,0 +1,78 @@
+﻿@page "/contactTable"
+@using Investment_Calc.Data.Models
+@inject Investment_Calc.Data.Interfaces.I_ContactFormRepo Repo
+@inject NavigationManager NavManager
+
+<h3>Contact List</h3>
+<div class="nav">
+    <button style="margin-right:15px" type="button" class="btn btn-primary" @onclick="ShowUnresolved">Display Unresolved Tickets</button>
+    <button type="button" class="btn btn-primary" @onclick="ShowAll">Display All Tickets</button>
+</div>
+<br />
+
+@if (cfs.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Customer Email</th>
+                <th>Type of Issue</th>
+                <th>Description</th>
+                <th>Notes</th>
+                <th>Resolved</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cf in cfs)
+            {
+                <tr>
+                    <td>@cf.CustomerEmail</td>
+                    @{
+                        String str = "New Investment";
+                        if (cf.ContactType == ContactForm.TYPE_GENERAL_INQUIRY)
+                        {
+                            str = "General Inquiry";
+                        }
+                        else if (cf.ContactType == ContactForm.TYPE_EXISTING_INVESTMENT)
+                        {
+                            str = "Existing Investment";
+                        }
+                        <td>@str</td>
+                    }
+                    <td>@cf.CustomerText</td>
+                    <td>@cf.SupportText</td>
+                    <td>@cf.isResolved</td>
+                    <td><button type="button" class="btn btn-primary" @onclick="()=>OnEditButtonClick(cf)">Open Ticket</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else {
+    <h2>All tickets resolved.</h2>
+}
+
+@code {
+        List<ContactForm>? cfs { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        ShowUnresolved();
+    }
+
+    async void ShowUnresolved()
+    {
+        cfs = await Repo.GetCFsNotResolvedAsync();
+    }
+
+    async void ShowAll()
+    {
+        cfs = await Repo.GetCFsAsync();
+    }
+
+    void OnEditButtonClick(ContactForm cf) {
+        NavManager.NavigateTo($"/contactEdit/{cf.Id}");
+    }
+}

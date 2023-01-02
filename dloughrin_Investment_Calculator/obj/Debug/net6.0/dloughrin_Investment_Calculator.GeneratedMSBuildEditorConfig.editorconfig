@@ -1,0 +1,88 @@
+is_global = true
+build_property.TargetFramework = net6.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = dloughrin_Investment_Calculator
+build_property.RootNamespace = dloughrin_Investment_Calculator
+build_property.ProjectDir = C:\Users\zapok\Documents\GitHub\CS2284\dloughrin_Investment_Calculator\dloughrin_Investment_Calculator\
+build_property.RazorLangVersion = 6.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\zapok\Documents\GitHub\CS2284\dloughrin_Investment_Calculator\dloughrin_Investment_Calculator
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/AssetAdd.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXNzZXRBZGQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/AssetTable.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXNzZXRUYWJsZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/CalcList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2FsY0xpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/CalcParams.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2FsY1BhcmFtcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/CalcResult.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2FsY1Jlc3VsdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/CalcTable.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2FsY1RhYmxlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/ContactEdit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ29udGFjdEVkaXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/ContactPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ29udGFjdFBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/ContactTable.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ29udGFjdFRhYmxlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/RadzenCategoryAxis.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmFkemVuQ2F0ZWdvcnlBeGlzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Shared/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-j2firsv39l
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Shared/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE5hdk1lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-ezmluqg709
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/_Host.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX0hvc3QuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/zapok/Documents/GitHub/CS2284/dloughrin_Investment_Calculator/dloughrin_Investment_Calculator/Pages/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX0xheW91dC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 

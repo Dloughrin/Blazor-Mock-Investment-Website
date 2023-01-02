@@ -1,0 +1,173 @@
+﻿@page "/contact"
+@using Investment_Calc.Data.Models
+@using System.Net.Mail;
+@using System.Text.RegularExpressions;
+@inject Investment_Calc.Data.Interfaces.I_ContactFormRepo Repo
+
+<h2>Contact Form</h2>
+
+<label class="form-check-label">User's Name:</label>
+<input class="input-group-text" type="text"
+       @bind="@name">
+<br />
+
+<label class="form-check-label"> Existing User?</label>
+<input type="checkbox" value="false" @bind="@existing" @onclick="ChangeEmail">
+<br />
+<br />
+
+<label class="form-check-label">Email:</label>
+<input class="input-group-text" type="text"
+       @bind="@email">
+<br />
+
+<label class="form-check-label">Phone Number:</label>
+<div class="nav" >
+    <input style="margin-right:5px" class="input-group-text" maxlength="3" size="1" type="text"
+               @bind="@phoneArea">
+    <h3 style="margin-right:5px">-</h3>
+    <input style="margin-right:5px" class="input-group-text" maxlength="3" size="1" type="text"
+           @bind="@phone1">
+    <h3 style="margin-right:5px">-</h3>
+    <input class="input-group-text" maxlength="4" size="2" type="text"
+           @bind="@phone2">
+</div>
+<br />
+
+<div>
+    <h3>Type of Help Needed</h3>
+    <div class="nav" >
+        <input style="margin-right:5px" class="form-check-input" type="radio" name="help" value=@ContactForm.TYPE_GENERAL_INQUIRY checked="true" @onchange="ChangeSelect" />
+        <label class="form-check-label">General Inquiry</label>
+    </div>
+    <div class="nav">
+        <input style="margin-right:5px" class="form-check-input" type="radio" name="help" value=@ContactForm.TYPE_EXISTING_INVESTMENT @onchange="ChangeSelect" />
+        <label class="form-check-label">Existing investment</label>
+    </div>
+    <div class="nav">
+        <input style="margin-right:5px" class="form-check-input" type="radio" name="help" value=@ContactForm.TYPE_PURCHASE_INVESTMENT @onchange="ChangeSelect" />
+        <label class="form-check-label">Purchasing an investment</label>
+    </div>
+</div>
+
+<br />
+<label class="form-check-label">Please explain the Issue:</label>
+<input style="width: 100%; text-align:left;" class="input-group-text" type="text"
+       @bind="@text">
+<br />
+
+<button class="btn btn-primary" @onclick="Send">Submit</button>
+<br />
+<br />
+<h3>@valid</h3>
+
+<br />
+
+@code {
+    [CascadingParameter(Name = "user")]
+    User User { get; set; }
+
+    [Parameter]
+    public string name { get; set; }
+
+    [Parameter]
+    public string email { get; set; }
+
+    [Parameter]
+    public string phoneArea { get; set; }
+
+    [Parameter]
+    public string phone1 { get; set; }
+
+    [Parameter]
+    public string phone2 { get; set; }
+
+    [Parameter]
+    public string text { get; set; }
+
+    [Parameter]
+    public string valid { get; set; }
+
+    [Parameter]
+    public int type { get; set; }
+
+    [Parameter]
+    public bool existing { get; set; }
+
+    public const string motif = @"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$";
+
+    public bool IsPhoneNbr(string number)
+    {
+        if (number != null) return Regex.IsMatch(number, motif);
+        else return false;
+    }
+
+    void ChangeEmail()
+    {
+        if(!existing) {
+            string str = String.Concat(User.Name.Where(c => !Char.IsWhiteSpace(c)));
+            email = str + "@example.com";
+        }
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        phoneArea = "555";
+        phone1 = "555";
+        phone2 = "5555";
+        type = ContactForm.TYPE_GENERAL_INQUIRY;
+        existing = false;
+        name = "";
+        text = "";
+    }
+
+    void ChangeSelect(ChangeEventArgs args)
+    {
+        type = int.Parse(args.Value.ToString());
+        Console.WriteLine(args.Value);
+    }
+
+    async void Send()
+    {
+        valid = "";
+
+        if (name.Length < 3)
+        {
+            valid += "Invalid name, it must be at least 3 characters.\n";
+        }
+
+        email = String.Concat(email.Where(c => !Char.IsWhiteSpace(c)));
+        try
+        {
+            var emailAddress = new MailAddress(email);
+        }
+        catch
+        {
+            valid += "Email is invalid.\n";
+        }
+        string phone = "(" + phoneArea + ") - " + phone1 + " - " + phone2;
+        if (!IsPhoneNbr("" + phoneArea+phone1+phone2))
+        {
+            valid += "Phone number is invalid.\n";
+        }
+
+        if (text.Length < 5)
+        {
+            valid += "Please give an explaination.\n";
+        }
+
+        if(valid == "") {
+            ContactForm cf = new ContactForm(name, email, phone, text, type);
+            await Repo.SaveCFAsync(cf);
+            valid = "Form sent. Customer support will deal with your ticket as soon as possible.";
+            phoneArea = "555";
+            phone1 = "555";
+            phone2 = "5555";
+            existing = false;
+            email = "";
+            name = "";
+            text = "";
+        }
+    }
+}

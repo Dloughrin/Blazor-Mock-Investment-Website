@@ -1,0 +1,93 @@
+﻿@page "/investments"
+@using Investment_Calc.Data.Models
+@inject Investment_Calc.Data.Interfaces.I_InvestmentRepo Repo
+@inject NavigationManager NavManager
+
+@if (calcs == null || calcs.Count == 0)
+{
+    <p>No invesments to show yet.</p>
+}
+else
+{
+    <br />
+    <h3>Investment Table:</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Starting Principle</th>
+                <th>Current Value</th>
+                <th>Interest</th>
+                <th>Compounds Per Year</th>
+                <th>Years</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cal in calcs)
+            {
+                <tr>
+                    <td>@cal.Principle.ToString("C2")</td>
+                    @{
+                        double fv = (double)cal.FutureValue!;
+                        String str = fv.ToString("C2");
+                        <td>@str</td>
+                    }
+                    <td>@cal.Interest.ToString("P2")</td>
+                    <td>@cal.CmpPerYr</td>
+                    <td>@cal.Years</td>
+                    @if(User.Classification == User.CLASS_ADMIN || cal.User_ID == User.Id) {
+                        <td><button type="button" class="btn btn-primary" @onclick="()=>OnEditButtonClick(cal)">Edit</button></td>
+                        <td><button type="button" class="btn btn-primary" @onclick="()=>OnDeleteButtonClick(cal)">Delete</button></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<br />
+
+<p>
+    <button type="button" class="btn btn-primary" @onclick="OnAddButtonClick">Add Investment</button>
+</p>
+<p>
+    @Message
+</p>
+
+@code {
+    [CascadingParameter(Name = "user")]
+    User User { get; set; }
+
+    List<InvestmentCalc>? calcs { get; set; }
+    public string Message { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        calcs = await Repo.GetInvestmentsAsync();
+    }
+
+    private async void OnAddButtonClick()
+    {
+        //TODO: Add stuff
+        //Message = $"Clicked at {DateTime.Now.ToString("T")}";
+        NavManager.NavigateTo("/InvestmentInput");
+
+        //await Repo.SaveInvestmentAsync(new InvestmentCalc());
+    }
+
+    private async void OnDeleteButtonClick(InvestmentCalc calc)
+    {
+        //Remove from database
+        await Repo.DeleteInvestmentAsync(calc);
+        //Remove from list by completely deleting from list
+        calcs?.Remove(calc);
+    }
+
+    private async void OnEditButtonClick(InvestmentCalc calc)
+    {
+        NavManager.NavigateTo($"/InvestmentInput/{calc.Id}");
+    }
+}
